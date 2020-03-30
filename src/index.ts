@@ -78,8 +78,16 @@ class TicketSeller {
     this.ticketOffice = ticketOffice;
   }
 
-  public getTicketOffice(): TicketOffice {
-    return this.ticketOffice;
+  public sellTo(audience: Audience) {
+    if (audience.getBag().hasInvitation()) {
+      const ticket = this.ticketOffice.getTicket();
+      audience.getBag().setTicket(ticket);
+    } else {
+      const ticket = this.ticketOffice.getTicket();
+      audience.getBag().minusAmount(ticket.getFee());
+      this.ticketOffice.plusAmount(ticket.getFee());
+      audience.getBag().setTicket(ticket);
+    }
   }
 }
 
@@ -90,14 +98,6 @@ class Theater {
   }
 
   public enter(audience: Audience): void {
-    if (audience.getBag().hasInvitation()) {
-      const ticket = this.ticketSeller.getTicketOffice().getTicket();
-      audience.getBag().setTicket(ticket);
-    } else {
-      const ticket = this.ticketSeller.getTicketOffice().getTicket();
-      audience.getBag().minusAmount(ticket.getFee());
-      this.ticketSeller.getTicketOffice().plusAmount(ticket.getFee());
-      audience.getBag().setTicket(ticket);
-    }
+    this.ticketSeller.sellTo(audience);
   }
 }
