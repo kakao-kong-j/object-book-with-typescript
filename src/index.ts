@@ -48,6 +48,16 @@ class Audience {
   public getBag(): Bag {
     return this.bag;
   }
+  public buy(ticket: Ticket): number {
+    if (this.bag.hasInvitation()) {
+      this.bag.setTicket(ticket);
+      return 0;
+    } else {
+      this.bag.setTicket(ticket);
+      this.bag.minusAmount(ticket.getFee());
+      return ticket.getFee();
+    }
+  }
 }
 
 class TicketOffice {
@@ -78,16 +88,8 @@ class TicketSeller {
     this.ticketOffice = ticketOffice;
   }
 
-  public sellTo(audience: Audience) {
-    if (audience.getBag().hasInvitation()) {
-      const ticket = this.ticketOffice.getTicket();
-      audience.getBag().setTicket(ticket);
-    } else {
-      const ticket = this.ticketOffice.getTicket();
-      audience.getBag().minusAmount(ticket.getFee());
-      this.ticketOffice.plusAmount(ticket.getFee());
-      audience.getBag().setTicket(ticket);
-    }
+  public sellTo(audience: Audience): void {
+    this.ticketOffice.plusAmount(audience.buy(this.ticketOffice.getTicket()));
   }
 }
 
