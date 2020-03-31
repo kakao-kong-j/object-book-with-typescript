@@ -19,7 +19,18 @@ class Bag {
     this.invitation = invitation;
   }
 
-  public hasInvitation(): boolean {
+  public hold(ticket: Ticket): number {
+    if (this.hasInvitation()) {
+      this.setTicket(ticket);
+      return 0;
+    } else {
+      this.setTicket(ticket);
+      this.minusAmount(ticket.getFee());
+      return ticket.getFee();
+    }
+  }
+
+  private hasInvitation(): boolean {
     return !!this.invitation;
   }
 
@@ -27,11 +38,11 @@ class Bag {
     return !!this.ticket;
   }
 
-  public setTicket(ticket: Ticket): Ticket {
+  private setTicket(ticket: Ticket): Ticket {
     return (this.ticket = ticket);
   }
 
-  public minusAmount(amount: number): void {
+  private minusAmount(amount: number): void {
     this.amount -= amount;
   }
 
@@ -49,14 +60,7 @@ class Audience {
     return this.bag;
   }
   public buy(ticket: Ticket): number {
-    if (this.bag.hasInvitation()) {
-      this.bag.setTicket(ticket);
-      return 0;
-    } else {
-      this.bag.setTicket(ticket);
-      this.bag.minusAmount(ticket.getFee());
-      return ticket.getFee();
-    }
+    return this.bag.hold(ticket);
   }
 }
 
