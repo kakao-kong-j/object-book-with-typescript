@@ -73,9 +73,16 @@ class TicketOffice {
     this.tickets = [...this.tickets, ...tickets];
   }
 
-  public getTicket(): Ticket {
-    return this.tickets[0];
+  private getTicket(): Ticket {
+    const target = this.tickets[0];
+    this.tickets.slice(0, this.tickets.length);
+    return target;
   }
+
+  public sellTicketTo(audience: Audience) {
+    this.plusAmount(audience.buy(this.getTicket()));
+  }
+
   public minusAmount(amount: number): void {
     this.amount -= amount;
   }
@@ -93,7 +100,7 @@ class TicketSeller {
   }
 
   public sellTo(audience: Audience): void {
-    this.ticketOffice.plusAmount(audience.buy(this.ticketOffice.getTicket()));
+    this.ticketOffice.sellTicketTo(audience);
   }
 }
 
