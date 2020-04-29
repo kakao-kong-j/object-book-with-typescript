@@ -44,14 +44,14 @@ class Money {
     this.amount = amount;
   }
 
-  public plus(amount: number): Money {
-    return new Money(this.amount + amount);
+  public plus(amount: Money): Money {
+    return new Money(this.amount + amount.amount);
   }
-  public minus(amount: number): Money {
-    return new Money(this.amount - amount);
+  public minus(amount: Money): Money {
+    return new Money(this.amount - amount.amount);
   }
-  public times(amount: number): Money {
-    return new Money(this.amount * amount);
+  public times(persent: number): Money {
+    return new Money(this.amount * persent);
   }
   public isLessThan(other: Money): boolean {
     return this.amount - other.amount < 0;
@@ -116,9 +116,17 @@ abstract class DiscountPolicy {
     this.conditions = conditions;
   }
   public calculateDiscountAmount(screening: Screening): Money {
-    // TODO
+    for (const each of this.conditions) {
+      if (each.isSatisfiedBy(screening)) {
+        return this.getDiscountAmount(screening);
+      }
+    }
     return Money.ZERO;
   }
-  abstract getDiscountAmout(screening: Screening): Money;
+  abstract getDiscountAmount(screening: Screening): Money;
 }
-class DiscountCondition {}
+class DiscountCondition {
+  public isSatisfiedBy(screening: Screening): boolean {
+    return true;
+  }
+}
