@@ -125,8 +125,58 @@ abstract class DiscountPolicy {
   }
   abstract getDiscountAmount(screening: Screening): Money;
 }
-class DiscountCondition {
+interface DiscountCondition {
+  isSatisfiedBy(screening: Screening): boolean;
+}
+
+class SequenceCondition implements DiscountCondition {
+  private sequence: number;
+  constructor(sequence: number) {
+    this.sequence = sequence;
+  }
   public isSatisfiedBy(screening: Screening): boolean {
-    return true;
+    return screening.isSequence(this.sequence);
+  }
+}
+
+class PeriodCodition implements DiscountCondition {
+  private dayOfWeek: number;
+  private startTime: Date;
+  private endTime: Date;
+
+  constructor(dayOfWeek: number, startTime: Date, endTime: Date) {
+    this.dayOfWeek = dayOfWeek;
+    this.startTime = startTime;
+    this.endTime = endTime;
+  }
+  isSatisfiedBy(screening: Screening): boolean {
+    return (
+      screening.getStartTime().getDay() === this.dayOfWeek &&
+      this.startTime <= screening.getStartTime() &&
+      this.endTime >= screening.getStartTime()
+    );
+  }
+}
+
+class AmountDiscountPolicy extends DiscountPolicy {
+  private discountAmount: Money;
+  constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
+    super(...conditions);
+    this.discountAmount = discountAmount;
+  }
+
+  getDiscountAmount(screening: Screening): Money {
+    return this.discountAmount;
+  }
+}
+
+class PercentDiscountPolicy extends DiscountPolicy {
+  private percent: number;
+  constructor(percent: number, ...conditions: DiscountCondition[]) {
+    super(...conditions);
+    this.percent = percent;
+  }
+  getDiscountAmount(screening: Screening): Money {
+    return screening.getMovieFee().times(this.percent);
   }
 }
