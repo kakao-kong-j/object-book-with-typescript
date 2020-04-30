@@ -1,4 +1,4 @@
-class Screening {
+export class Screening {
   private movie: Movie;
   private sequence: number;
   private whenScreened: Date;
@@ -33,7 +33,7 @@ class Screening {
   }
 }
 
-class Money {
+export class Money {
   public static ZERO = Money.wons(0);
   public amount: number;
 
@@ -60,9 +60,9 @@ class Money {
     return this.amount - other.amount > 0;
   }
 }
-class Customer {}
+export class Customer {}
 
-class Reservation {
+export class Reservation {
   private customer: Customer;
   private screening: Screening;
   private fee: Money;
@@ -81,7 +81,7 @@ class Reservation {
   }
 }
 
-class Movie {
+export class Movie {
   private title: string;
   private runningTime: number;
   private fee: Money;
@@ -129,7 +129,7 @@ interface DiscountCondition {
   isSatisfiedBy(screening: Screening): boolean;
 }
 
-class SequenceCondition implements DiscountCondition {
+export class SequenceCondition implements DiscountCondition {
   private sequence: number;
   constructor(sequence: number) {
     this.sequence = sequence;
@@ -139,7 +139,7 @@ class SequenceCondition implements DiscountCondition {
   }
 }
 
-class PeriodCodition implements DiscountCondition {
+export class PeriodCodition implements DiscountCondition {
   private dayOfWeek: number;
   private startTime: Date;
   private endTime: Date;
@@ -158,7 +158,7 @@ class PeriodCodition implements DiscountCondition {
   }
 }
 
-class AmountDiscountPolicy extends DiscountPolicy {
+export class AmountDiscountPolicy extends DiscountPolicy {
   private discountAmount: Money;
   constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
     super(...conditions);
@@ -170,7 +170,7 @@ class AmountDiscountPolicy extends DiscountPolicy {
   }
 }
 
-class PercentDiscountPolicy extends DiscountPolicy {
+export class PercentDiscountPolicy extends DiscountPolicy {
   private percent: number;
   constructor(percent: number, ...conditions: DiscountCondition[]) {
     super(...conditions);
