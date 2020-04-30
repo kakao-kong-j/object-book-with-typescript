@@ -1,7 +1,7 @@
 export class Screening {
   private movie: Movie;
-  private sequence: number;
-  private whenScreened: Date;
+  private readonly sequence: number;
+  private readonly whenScreened: Date;
 
   constructor(movie: Movie, sequence: number, whenScreened: Date) {
     this.movie = movie;
@@ -50,8 +50,8 @@ export class Money {
   public minus(amount: Money): Money {
     return new Money(this.amount - amount.amount);
   }
-  public times(persent: number): Money {
-    return new Money(this.amount * persent);
+  public times(percent: number): Money {
+    return new Money(this.amount * percent);
   }
   public isLessThan(other: Money): boolean {
     return this.amount - other.amount < 0;
@@ -84,7 +84,7 @@ export class Reservation {
 export class Movie {
   private title: string;
   private runningTime: number;
-  private fee: Money;
+  private readonly fee: Money;
   private discountPolicy: DiscountPolicy;
 
   constructor(
@@ -111,8 +111,8 @@ export class Movie {
 }
 
 abstract class DiscountPolicy {
-  private conditions: DiscountCondition[] = [];
-  constructor(...conditions: DiscountCondition[]) {
+  private readonly conditions: DiscountCondition[] = [];
+  protected constructor(...conditions: DiscountCondition[]) {
     this.conditions = conditions;
   }
   public calculateDiscountAmount(screening: Screening): Money {
@@ -130,7 +130,7 @@ interface DiscountCondition {
 }
 
 export class SequenceCondition implements DiscountCondition {
-  private sequence: number;
+  private readonly sequence: number;
   constructor(sequence: number) {
     this.sequence = sequence;
   }
@@ -139,10 +139,10 @@ export class SequenceCondition implements DiscountCondition {
   }
 }
 
-export class PeriodCodition implements DiscountCondition {
-  private dayOfWeek: number;
-  private startTime: Date;
-  private endTime: Date;
+export class PeriodCondition implements DiscountCondition {
+  private readonly dayOfWeek: number;
+  private readonly startTime: Date;
+  private readonly endTime: Date;
 
   constructor(dayOfWeek: number, startTime: Date, endTime: Date) {
     this.dayOfWeek = dayOfWeek;
@@ -159,7 +159,7 @@ export class PeriodCodition implements DiscountCondition {
 }
 
 export class AmountDiscountPolicy extends DiscountPolicy {
-  private discountAmount: Money;
+  private readonly discountAmount: Money;
   constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
     super(...conditions);
     this.discountAmount = discountAmount;
@@ -171,7 +171,7 @@ export class AmountDiscountPolicy extends DiscountPolicy {
 }
 
 export class PercentDiscountPolicy extends DiscountPolicy {
-  private percent: number;
+  private readonly percent: number;
   constructor(percent: number, ...conditions: DiscountCondition[]) {
     super(...conditions);
     this.percent = percent;

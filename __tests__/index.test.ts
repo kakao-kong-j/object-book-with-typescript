@@ -3,7 +3,7 @@ import {
   Movie,
   Money,
   SequenceCondition,
-  PeriodCodition,
+  PeriodCondition,
   PercentDiscountPolicy,
   Screening,
 } from "../src/chapter2";
@@ -16,8 +16,8 @@ test("This is a sample", () => {
       Money.wons(800),
       new SequenceCondition(1),
       new SequenceCondition(10),
-      new PeriodCodition(1, new Date(), new Date()),
-      new PeriodCodition(1, new Date(), new Date())
+      new PeriodCondition(1, new Date(), new Date()),
+      new PeriodCondition(1, new Date(), new Date())
     )
   );
   console.log(avatar.calculateMovieFee(new Screening(avatar, 1, new Date())));
@@ -28,9 +28,9 @@ test("This is a sample", () => {
     Money.wons(11000),
     new PercentDiscountPolicy(
       0.1,
-      new PeriodCodition(2, new Date(), new Date()),
+      new PeriodCondition(2, new Date(), new Date()),
       new SequenceCondition(2),
-      new PeriodCodition(4, new Date(), new Date())
+      new PeriodCondition(4, new Date(), new Date())
     )
   );
   console.log(titanic.calculateMovieFee(new Screening(titanic, 2, new Date())));
