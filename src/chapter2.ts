@@ -85,13 +85,13 @@ export class Movie {
   private title: string;
   private runningTime: number;
   private readonly fee: Money;
-  private discountPolicy: DiscountPolicy;
+  private readonly discountPolicy?: DiscountPolicy;
 
   constructor(
     title: string,
     runningTime: number,
     fee: Money,
-    discountPolicy: DiscountPolicy
+    discountPolicy?: DiscountPolicy
   ) {
     this.title = title;
     this.runningTime = runningTime;
@@ -104,6 +104,9 @@ export class Movie {
   }
 
   public calculateMovieFee(screening: Screening): Money {
+    if(!this.discountPolicy){
+      return this.getFee()
+    }
     return this.fee.minus(
       this.discountPolicy.calculateDiscountAmount(screening)
     );

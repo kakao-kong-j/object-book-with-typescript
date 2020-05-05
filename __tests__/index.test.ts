@@ -57,4 +57,20 @@ describe("This is a sample", () => {
     //THEN
     expect(fee.amount).toEqual(9000);
   });
+  it("할인 정책이 없을 수 있습니다.",()=>{
+    //GIVEN
+    const titanic = new Movie(
+        "titanic",
+        180,
+        Money.wons(10000)
+    );
+    const now = new Date(2000, 1, 2, 0, 0, 0);
+    const sequence = 1;
+    //WHEN
+    const fee = titanic.calculateMovieFee(
+        new Screening(titanic, sequence, now)
+    );
+    //THEN
+    expect(fee.amount).toEqual(10000);
+  })
 });
