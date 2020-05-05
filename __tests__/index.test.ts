@@ -5,7 +5,7 @@ import {
   SequenceCondition,
   PeriodCondition,
   PercentDiscountPolicy,
-  Screening,
+  Screening, NoneDiscountPolicy,
 } from "../src/chapter2";
 describe("This is a sample", () => {
   it("금액 할인만 받고 기간 할인에는 일치 하지 않을 때", () => {
@@ -62,7 +62,8 @@ describe("This is a sample", () => {
     const titanic = new Movie(
         "titanic",
         180,
-        Money.wons(10000)
+        Money.wons(10000),
+        new NoneDiscountPolicy()
     );
     const now = new Date(2000, 1, 2, 0, 0, 0);
     const sequence = 1;
