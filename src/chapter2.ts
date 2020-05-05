@@ -84,8 +84,8 @@ export class Reservation {
 export class Movie {
   private title: string;
   private runningTime: number;
+  private discountPolicy: DiscountPolicy;
   private readonly fee: Money;
-  private readonly discountPolicy: DiscountPolicy;
 
   constructor(
     title: string,
@@ -104,20 +104,23 @@ export class Movie {
   }
 
   public calculateMovieFee(screening: Screening): Money {
-    if(!this.discountPolicy){
-      return this.getFee()
+    if (!this.discountPolicy) {
+      return this.getFee();
     }
     return this.fee.minus(
       this.discountPolicy.calculateDiscountAmount(screening)
     );
   }
+  public changeDiscountPolicy(discountPolicy: DiscountPolicy) {
+    this.discountPolicy = discountPolicy;
+  }
 }
 
 interface DiscountPolicy {
-  calculateDiscountAmount(screen:Screening):Money
+  calculateDiscountAmount(screen: Screening): Money;
 }
 
-abstract class DefaultDiscountPolicy implements DiscountPolicy{
+abstract class DefaultDiscountPolicy implements DiscountPolicy {
   private readonly conditions: DiscountCondition[] = [];
   protected constructor(...conditions: DiscountCondition[]) {
     this.conditions = conditions;
@@ -188,7 +191,7 @@ export class PercentDiscountPolicy extends DefaultDiscountPolicy {
   }
 }
 
-export class NoneDiscountPolicy implements DiscountPolicy{
+export class NoneDiscountPolicy implements DiscountPolicy {
   calculateDiscountAmount(screen: Screening): Money {
     return Money.ZERO;
   }
