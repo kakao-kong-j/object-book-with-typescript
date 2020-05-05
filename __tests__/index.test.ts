@@ -101,6 +101,6 @@ describe("This is a sample", () => {
       new Screening(titanic, sequence, now)
     );
     //THEN
-    expect(fee.amount).toEqual(10000);
+    expect(fee.amount).toEqual(9000);
   });
 });
