@@ -12,15 +12,13 @@ export class Screening {
   public getStartTime(): Date {
     return this.whenScreened;
   }
+
   public isSequence(sequence: number): boolean {
     return this.sequence === sequence;
   }
+
   public getMovieFee(): Money {
     return this.movie.getFee();
-  }
-
-  private calculateFee(audienceCount: number): Money {
-    return this.movie.calculateMovieFee(this).times(audienceCount);
   }
 
   public reserve(customer: Customer, audienceCount: number): Reservation {
@@ -31,35 +29,45 @@ export class Screening {
       audienceCount
     );
   }
+
+  private calculateFee(audienceCount: number): Money {
+    return this.movie.calculateMovieFee(this).times(audienceCount);
+  }
 }
 
 export class Money {
   public static ZERO = Money.wons(0);
   public amount: number;
 
-  public static wons(amount: number) {
-    return new Money(amount);
-  }
   constructor(amount: number) {
     this.amount = amount;
+  }
+
+  public static wons(amount: number) {
+    return new Money(amount);
   }
 
   public plus(amount: Money): Money {
     return new Money(this.amount + amount.amount);
   }
+
   public minus(amount: Money): Money {
     return new Money(this.amount - amount.amount);
   }
+
   public times(percent: number): Money {
     return new Money(this.amount * percent);
   }
+
   public isLessThan(other: Money): boolean {
     return this.amount - other.amount < 0;
   }
+
   public isGreaterThan(other: Money): boolean {
     return this.amount - other.amount > 0;
   }
 }
+
 export class Customer {}
 
 export class Reservation {
@@ -111,6 +119,7 @@ export class Movie {
       this.discountPolicy.calculateDiscountAmount(screening)
     );
   }
+
   public changeDiscountPolicy(discountPolicy: DiscountPolicy) {
     this.discountPolicy = discountPolicy;
   }
@@ -122,9 +131,11 @@ interface DiscountPolicy {
 
 abstract class DefaultDiscountPolicy implements DiscountPolicy {
   private readonly conditions: DiscountCondition[] = [];
+
   protected constructor(...conditions: DiscountCondition[]) {
     this.conditions = conditions;
   }
+
   public calculateDiscountAmount(screening: Screening): Money {
     for (const each of this.conditions) {
       if (each.isSatisfiedBy(screening)) {
@@ -133,17 +144,21 @@ abstract class DefaultDiscountPolicy implements DiscountPolicy {
     }
     return Money.ZERO;
   }
+
   abstract getDiscountAmount(screening: Screening): Money;
 }
+
 interface DiscountCondition {
   isSatisfiedBy(screening: Screening): boolean;
 }
 
 export class SequenceCondition implements DiscountCondition {
   private readonly sequence: number;
+
   constructor(sequence: number) {
     this.sequence = sequence;
   }
+
   public isSatisfiedBy(screening: Screening): boolean {
     return screening.isSequence(this.sequence);
   }
@@ -159,6 +174,7 @@ export class PeriodCondition implements DiscountCondition {
     this.startTime = startTime;
     this.endTime = endTime;
   }
+
   isSatisfiedBy(screening: Screening): boolean {
     return (
       screening.getStartTime().getDay() === this.dayOfWeek &&
@@ -170,6 +186,7 @@ export class PeriodCondition implements DiscountCondition {
 
 export class AmountDiscountPolicy extends DefaultDiscountPolicy {
   private readonly discountAmount: Money;
+
   constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
     super(...conditions);
     this.discountAmount = discountAmount;
@@ -182,10 +199,12 @@ export class AmountDiscountPolicy extends DefaultDiscountPolicy {
 
 export class PercentDiscountPolicy extends DefaultDiscountPolicy {
   private readonly percent: number;
+
   constructor(percent: number, ...conditions: DiscountCondition[]) {
     super(...conditions);
     this.percent = percent;
   }
+
   getDiscountAmount(screening: Screening): Money {
     return screening.getMovieFee().times(this.percent);
   }
