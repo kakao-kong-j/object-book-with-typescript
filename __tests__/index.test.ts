@@ -7,7 +7,7 @@ import {
   PercentDiscountPolicy,
   Screening,
   NoneDiscountPolicy,
-} from "../src/chapter2";
+} from "../src";
 describe("할인 정책에 맞는 할인을 받을 수 있다.", () => {
   it("금액 할인만 받고 기간 할인에는 일치 하지 않을 때", () => {
     //GIVEN

@@ -1,116 +1,198 @@
-class Invitation {
-  private when: Date;
+export class Screening {
+  private movie: Movie;
+  private readonly sequence: number;
+  private readonly whenScreened: Date;
+
+  constructor(movie: Movie, sequence: number, whenScreened: Date) {
+    this.movie = movie;
+    this.sequence = sequence;
+    this.whenScreened = whenScreened;
+  }
+
+  public getStartTime(): Date {
+    return this.whenScreened;
+  }
+  public isSequence(sequence: number): boolean {
+    return this.sequence === sequence;
+  }
+  public getMovieFee(): Money {
+    return this.movie.getFee();
+  }
+
+  private calculateFee(audienceCount: number): Money {
+    return this.movie.calculateMovieFee(this).times(audienceCount);
+  }
+
+  public reserve(customer: Customer, audienceCount: number): Reservation {
+    return new Reservation(
+      customer,
+      this,
+      this.calculateFee(audienceCount),
+      audienceCount
+    );
+  }
 }
 
-class Ticket {
-  private fee: number;
-  public getFee(): number {
+export class Money {
+  public static ZERO = Money.wons(0);
+  public amount: number;
+
+  public static wons(amount: number) {
+    return new Money(amount);
+  }
+  constructor(amount: number) {
+    this.amount = amount;
+  }
+
+  public plus(amount: Money): Money {
+    return new Money(this.amount + amount.amount);
+  }
+  public minus(amount: Money): Money {
+    return new Money(this.amount - amount.amount);
+  }
+  public times(percent: number): Money {
+    return new Money(this.amount * percent);
+  }
+  public isLessThan(other: Money): boolean {
+    return this.amount - other.amount < 0;
+  }
+  public isGreaterThan(other: Money): boolean {
+    return this.amount - other.amount > 0;
+  }
+}
+export class Customer {}
+
+export class Reservation {
+  private customer: Customer;
+  private screening: Screening;
+  private fee: Money;
+  private audienceCount: number;
+
+  constructor(
+    customer: Customer,
+    screening: Screening,
+    fee: Money,
+    audienceCount: number
+  ) {
+    this.audienceCount = audienceCount;
+    this.customer = customer;
+    this.screening = screening;
+    this.fee = fee;
+  }
+}
+
+export class Movie {
+  private title: string;
+  private runningTime: number;
+  private discountPolicy: DiscountPolicy;
+  private readonly fee: Money;
+
+  constructor(
+    title: string,
+    runningTime: number,
+    fee: Money,
+    discountPolicy: DiscountPolicy
+  ) {
+    this.title = title;
+    this.runningTime = runningTime;
+    this.fee = fee;
+    this.discountPolicy = discountPolicy;
+  }
+
+  public getFee(): Money {
     return this.fee;
   }
-}
 
-class Bag {
-  private amount: number;
-  private invitation?: Invitation;
-  private ticket?: Ticket;
-
-  constructor(amount: number, invitation?: Invitation) {
-    this.amount = amount;
-    this.invitation = invitation;
-  }
-
-  public hold(ticket: Ticket): number {
-    if (this.hasInvitation()) {
-      this.setTicket(ticket);
-      return 0;
-    } else {
-      this.setTicket(ticket);
-      this.minusAmount(ticket.getFee());
-      return ticket.getFee();
+  public calculateMovieFee(screening: Screening): Money {
+    if (!this.discountPolicy) {
+      return this.getFee();
     }
+    return this.fee.minus(
+      this.discountPolicy.calculateDiscountAmount(screening)
+    );
   }
-
-  private hasInvitation(): boolean {
-    return !!this.invitation;
-  }
-
-  public hasTicket(): boolean {
-    return !!this.ticket;
-  }
-
-  private setTicket(ticket: Ticket): Ticket {
-    return (this.ticket = ticket);
-  }
-
-  private minusAmount(amount: number): void {
-    this.amount -= amount;
-  }
-
-  public plusAmount(amount: number): void {
-    this.amount += amount;
+  public changeDiscountPolicy(discountPolicy: DiscountPolicy) {
+    this.discountPolicy = discountPolicy;
   }
 }
 
-class Audience {
-  private bag: Bag;
-  constructor(bag: Bag) {
-    this.bag = bag;
+interface DiscountPolicy {
+  calculateDiscountAmount(screen: Screening): Money;
+}
+
+abstract class DefaultDiscountPolicy implements DiscountPolicy {
+  private readonly conditions: DiscountCondition[] = [];
+  protected constructor(...conditions: DiscountCondition[]) {
+    this.conditions = conditions;
   }
-  public getBag(): Bag {
-    return this.bag;
+  public calculateDiscountAmount(screening: Screening): Money {
+    for (const each of this.conditions) {
+      if (each.isSatisfiedBy(screening)) {
+        return this.getDiscountAmount(screening);
+      }
+    }
+    return Money.ZERO;
   }
-  public buy(ticket: Ticket): number {
-    return this.bag.hold(ticket);
+  abstract getDiscountAmount(screening: Screening): Money;
+}
+interface DiscountCondition {
+  isSatisfiedBy(screening: Screening): boolean;
+}
+
+export class SequenceCondition implements DiscountCondition {
+  private readonly sequence: number;
+  constructor(sequence: number) {
+    this.sequence = sequence;
+  }
+  public isSatisfiedBy(screening: Screening): boolean {
+    return screening.isSequence(this.sequence);
   }
 }
 
-class TicketOffice {
-  private amount: number;
-  private tickets: Ticket[] = [];
+export class PeriodCondition implements DiscountCondition {
+  private readonly dayOfWeek: number;
+  private readonly startTime: Date;
+  private readonly endTime: Date;
 
-  constructor(amount: number, ...tickets: Ticket[]) {
-    this.amount = amount;
-    this.tickets = [...this.tickets, ...tickets];
+  constructor(dayOfWeek: number, startTime: Date, endTime: Date) {
+    this.dayOfWeek = dayOfWeek;
+    this.startTime = startTime;
+    this.endTime = endTime;
   }
-
-  private getTicket(): Ticket {
-    const target = this.tickets[0];
-    this.tickets.slice(0, this.tickets.length);
-    return target;
-  }
-
-  public sellTicketTo(audience: Audience) {
-    this.plusAmount(audience.buy(this.getTicket()));
-  }
-
-  public minusAmount(amount: number): void {
-    this.amount -= amount;
-  }
-
-  public plusAmount(amount: number): void {
-    this.amount += amount;
+  isSatisfiedBy(screening: Screening): boolean {
+    return (
+      screening.getStartTime().getDay() === this.dayOfWeek &&
+      this.startTime <= screening.getStartTime() &&
+      this.endTime >= screening.getStartTime()
+    );
   }
 }
 
-class TicketSeller {
-  private ticketOffice: TicketOffice;
-
-  constructor(ticketOffice: TicketOffice) {
-    this.ticketOffice = ticketOffice;
+export class AmountDiscountPolicy extends DefaultDiscountPolicy {
+  private readonly discountAmount: Money;
+  constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
+    super(...conditions);
+    this.discountAmount = discountAmount;
   }
 
-  public sellTo(audience: Audience): void {
-    this.ticketOffice.sellTicketTo(audience);
+  getDiscountAmount(screening: Screening): Money {
+    return this.discountAmount;
   }
 }
 
-class Theater {
-  private ticketSeller: TicketSeller;
-  constructor(ticketSeller: TicketSeller) {
-    this.ticketSeller = ticketSeller;
+export class PercentDiscountPolicy extends DefaultDiscountPolicy {
+  private readonly percent: number;
+  constructor(percent: number, ...conditions: DiscountCondition[]) {
+    super(...conditions);
+    this.percent = percent;
   }
+  getDiscountAmount(screening: Screening): Money {
+    return screening.getMovieFee().times(this.percent);
+  }
+}
 
-  public enter(audience: Audience): void {
-    this.ticketSeller.sellTo(audience);
+export class NoneDiscountPolicy implements DiscountPolicy {
+  calculateDiscountAmount(screen: Screening): Money {
+    return Money.ZERO;
   }
 }
