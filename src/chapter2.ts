@@ -84,8 +84,8 @@ export class Reservation {
 export class Movie {
   private title: string;
   private runningTime: number;
-  private readonly fee: Money;
   private discountPolicy: DiscountPolicy;
+  private readonly fee: Money;
 
   constructor(
     title: string,
@@ -104,13 +104,23 @@ export class Movie {
   }
 
   public calculateMovieFee(screening: Screening): Money {
+    if (!this.discountPolicy) {
+      return this.getFee();
+    }
     return this.fee.minus(
       this.discountPolicy.calculateDiscountAmount(screening)
     );
   }
+  public changeDiscountPolicy(discountPolicy: DiscountPolicy) {
+    this.discountPolicy = discountPolicy;
+  }
 }
 
-abstract class DiscountPolicy {
+interface DiscountPolicy {
+  calculateDiscountAmount(screen: Screening): Money;
+}
+
+abstract class DefaultDiscountPolicy implements DiscountPolicy {
   private readonly conditions: DiscountCondition[] = [];
   protected constructor(...conditions: DiscountCondition[]) {
     this.conditions = conditions;
@@ -158,7 +168,7 @@ export class PeriodCondition implements DiscountCondition {
   }
 }
 
-export class AmountDiscountPolicy extends DiscountPolicy {
+export class AmountDiscountPolicy extends DefaultDiscountPolicy {
   private readonly discountAmount: Money;
   constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
     super(...conditions);
@@ -170,7 +180,7 @@ export class AmountDiscountPolicy extends DiscountPolicy {
   }
 }
 
-export class PercentDiscountPolicy extends DiscountPolicy {
+export class PercentDiscountPolicy extends DefaultDiscountPolicy {
   private readonly percent: number;
   constructor(percent: number, ...conditions: DiscountCondition[]) {
     super(...conditions);
@@ -178,5 +188,11 @@ export class PercentDiscountPolicy extends DiscountPolicy {
   }
   getDiscountAmount(screening: Screening): Money {
     return screening.getMovieFee().times(this.percent);
+  }
+}
+
+export class NoneDiscountPolicy implements DiscountPolicy {
+  calculateDiscountAmount(screen: Screening): Money {
+    return Money.ZERO;
   }
 }
