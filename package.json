@@ -27,7 +27,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "__tests__",
+    "rootDir": "src",
     "testRegex": [
       ".test.ts$",
       ".spec.ts$"
