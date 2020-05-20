@@ -18,6 +18,15 @@ export class Screening {
 }
 
 class Movie {
+  private title: string;
+  private runningTime: number;
+  private fee: Money;
+  private discountConditions: DiscountCondition[];
+
+  private movieType: MovieType;
+  private discountAmount: Money;
+  private discountPercent: number;
+
   public calculateMovieFee(screening: Screening): Money {}
 }
 
@@ -26,3 +35,11 @@ class Customer {}
 class Reservation {}
 
 class Money {}
+
+class DiscountCondition {}
+
+enum MovieType {
+  AMOUNT_DISCOUNT,
+  PERCENT_DISCOUNT,
+  NONE_DISCOUNT,
+}
